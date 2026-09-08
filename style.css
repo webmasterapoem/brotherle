@@ -250,6 +250,10 @@ body {
   z-index: 10;
 }
 
+.result-overlay[hidden] {
+  display: none;
+}
+
 .result-card {
   width: 100%;
   max-width: 380px;
