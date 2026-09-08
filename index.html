@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Brotherle</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page">
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Brotherle</h1>
+      <div class="stats-row">
+        <span class="stat-chip" id="statSolved">0/0 solved</span>
+        <span class="stat-dot">&middot;</span>
+        <span class="stat-chip" id="statStreak">0 streak</span>
+      </div>
+    </header>
+
+    <div class="round-label" id="roundLabel">Face 1 of 60</div>
+
+    <div class="frame-wrap">
+      <div class="frame-outer">
+        <div class="frame-inner" id="frameInner">
+          <img id="avatarImg" class="avatar-img" src="" alt="Guess this person" draggable="false" />
+        </div>
+      </div>
+      <div class="hint-text" id="hintText" hidden></div>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="message-row" id="messageRow"></div>
+
+    <div class="control-row">
+      <button class="ghost-btn" id="hintBtn">Hint</button>
+      <button class="ghost-btn" id="giveUpBtn">Reveal name</button>
+    </div>
+
+    <div class="keyboard" id="keyboard"></div>
+  </div>
+
+  <!-- Win / Lose reveal screen -->
+  <div class="result-overlay" id="resultOverlay" hidden>
+    <div class="result-card">
+      <div class="result-status" id="resultStatus">You got it!</div>
+      <div class="result-photo-frame">
+        <img id="resultImg" class="result-photo" src="" alt="" draggable="false" />
+      </div>
+      <div class="result-name" id="resultName">Name</div>
+      <div class="result-stats" id="resultStats"></div>
+      <button class="primary-btn" id="nextBtn">See next face</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
