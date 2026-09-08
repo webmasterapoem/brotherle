@@ -86,6 +86,55 @@ const els = {
 };
 
 /* ---------------------------------------------------------
+   BOARD (built once per round; only the active row is touched
+   while typing, so completed rows never replay their animation)
+--------------------------------------------------------- */
+
+let tileRows = []; // tileRows[r] = { rowEl, tiles: [tileEl, ...] }
+
+function buildBoard(nameLen) {
+  els.board.innerHTML = "";
+  tileRows = [];
+  for (let r = 0; r < MAX_GUESSES; r++) {
+    const rowEl = document.createElement("div");
+    rowEl.className = "tile-row";
+    const tiles = [];
+    for (let c = 0; c < nameLen; c++) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      rowEl.appendChild(tile);
+      tiles.push(tile);
+    }
+    els.board.appendChild(rowEl);
+    tileRows.push({ rowEl, tiles });
+  }
+}
+
+function renderTypingRow() {
+  if (status !== "playing") return;
+  const row = tileRows[guesses.length];
+  if (!row) return;
+  const letters = current.toUpperCase().split("");
+  row.tiles.forEach((tile, c) => {
+    const letter = letters[c] || "";
+    tile.textContent = letter;
+    tile.classList.toggle("filled", !!letter);
+  });
+}
+
+function fillSubmittedRow(rowIndex, word, feedback) {
+  const row = tileRows[rowIndex];
+  if (!row) return;
+  const letters = word.toUpperCase().split("");
+  row.tiles.forEach((tile, c) => {
+    tile.textContent = letters[c] || "";
+    tile.classList.remove("filled");
+    tile.classList.add(feedback[c]);
+    tile.classList.add("tile-flip");
+  });
+}
+
+/* ---------------------------------------------------------
    RENDER
 --------------------------------------------------------- */
 
@@ -115,37 +164,7 @@ function render() {
   els.hintBtn.style.visibility = status === "playing" ? "visible" : "hidden";
   els.giveUpBtn.style.visibility = status === "playing" ? "visible" : "hidden";
 
-  // Board
-  els.board.innerHTML = "";
-  const rowsToRender = Math.max(MAX_GUESSES, guesses.length + 1);
-  for (let r = 0; r < rowsToRender; r++) {
-    const guessRow = guesses[r];
-    const isCurrentRow = r === guesses.length && status === "playing";
-    const letters = guessRow
-      ? guessRow.word.toUpperCase().split("")
-      : isCurrentRow
-      ? current.toUpperCase().split("")
-      : [];
-
-    const rowEl = document.createElement("div");
-    rowEl.className = "tile-row";
-
-    for (let c = 0; c < nameLen; c++) {
-      const letter = letters[c] || "";
-      const state = guessRow ? guessRow.feedback[c] : null;
-      const tile = document.createElement("div");
-      tile.className = "tile";
-      if (state) {
-        tile.classList.add(state);
-        if (guessRow) tile.classList.add("tile-flip");
-      } else if (letter) {
-        tile.classList.add("filled");
-      }
-      tile.textContent = letter;
-      rowEl.appendChild(tile);
-    }
-    els.board.appendChild(rowEl);
-  }
+  renderTypingRow();
 
   // Message
   els.messageRow.innerHTML = "";
@@ -196,11 +215,10 @@ function showResultScreen(person, outcome) {
 --------------------------------------------------------- */
 
 function triggerShake() {
-  const rows = els.board.querySelectorAll(".tile-row");
-  const lastRow = rows[guesses.length];
-  if (!lastRow) return;
-  lastRow.classList.add("tile-shake");
-  setTimeout(() => lastRow.classList.remove("tile-shake"), 420);
+  const row = tileRows[guesses.length];
+  if (!row) return;
+  row.rowEl.classList.add("tile-shake");
+  setTimeout(() => row.rowEl.classList.remove("tile-shake"), 420);
 }
 
 function submitGuess() {
@@ -219,6 +237,7 @@ function submitGuess() {
   const fb = getFeedback(current, name);
   const isWin = stripDiacritics(current.toUpperCase()) === stripDiacritics(name.toUpperCase());
 
+  fillSubmittedRow(guesses.length, current, fb);
   guesses.push({ word: current, feedback: fb });
 
   if (isWin) {
@@ -276,6 +295,7 @@ function nextFace() {
   message = "";
   keyStates = {};
   showHint = false;
+  buildBoard(currentPerson().name.length);
   render();
 }
 
@@ -307,4 +327,5 @@ window.addEventListener("keydown", (e) => {
   if (/^[a-zA-Z]$/.test(k)) return handleKey(k.toUpperCase());
 });
 
+buildBoard(currentPerson().name.length);
 render();
